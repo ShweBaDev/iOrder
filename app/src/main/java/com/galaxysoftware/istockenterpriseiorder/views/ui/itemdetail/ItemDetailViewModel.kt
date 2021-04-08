@@ -46,7 +46,9 @@ class ItemDetailViewModel : ViewModel() {
                         unitqty = 1.0,
                         unittypeid = 1,
                         voucherNo = null,
-                        saleprice = codelist[0].saleprice)
+                        saleprice = codelist[0].saleprice,
+                        remark = null
+                )
             }
         }
         return result as MutableLiveData<UsrCode>

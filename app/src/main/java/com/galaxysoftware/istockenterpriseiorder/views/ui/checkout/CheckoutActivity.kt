@@ -1,8 +1,12 @@
 package com.galaxysoftware.istockenterpriseiorder.views.ui.checkout
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -16,7 +20,9 @@ import com.galaxysoftware.istockenterpriseiorder.utils.Utility
 import com.galaxysoftware.istockenterpriseiorder.utils.Utility.showProgressBar
 import com.galaxysoftware.istockenterpriseiorder.views.BaseRecyclerViewAdapter
 import com.galaxysoftware.istockenterpriseiorder.views.RecyclerItemTouchHelper
+import com.google.android.material.textfield.TextInputEditText
 import java.text.DecimalFormat
+
 
 class CheckoutActivity : BaseActivity() {
 
@@ -26,9 +32,9 @@ class CheckoutActivity : BaseActivity() {
     private lateinit var checkoutRecyclerAdapter: BaseRecyclerViewAdapter<ShoppingCartItem>
 
 
-    lateinit var docId : String
-    lateinit var currentdocId : MutableLiveData<List<VoucherId>>
-    lateinit var generateddocId : MutableLiveData<VoucherId>
+    lateinit var docId: String
+    lateinit var currentdocId: MutableLiveData<List<VoucherId>>
+    lateinit var generateddocId: MutableLiveData<VoucherId>
 
     private var decimalPriceFormatter = DecimalFormat("#,###")
 
@@ -37,13 +43,18 @@ class CheckoutActivity : BaseActivity() {
 
         binding = ActivityCheckoutBinding.inflate(layoutInflater)
         val vmFactory = CheckoutViewModelFactory(application)
-        checkoutViewModel = ViewModelProvider(this,vmFactory).get(CheckoutViewModel::class.java)
+        checkoutViewModel = ViewModelProvider(this, vmFactory).get(CheckoutViewModel::class.java)
 
 
         checkoutRecyclerView = binding.checkoutRecyclerView
         checkoutRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
         checkoutRecyclerView.itemAnimator = DefaultItemAnimator()
-        checkoutRecyclerView.addItemDecoration(DividerItemDecoration(this,DividerItemDecoration.VERTICAL))
+        checkoutRecyclerView.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                DividerItemDecoration.VERTICAL
+            )
+        )
 
 
 
@@ -56,11 +67,13 @@ class CheckoutActivity : BaseActivity() {
         setContentView(view)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        
+
         checkoutViewModel.cardItems?.observe(this, Observer { it ->
 
-            binding.txtTotalQty.text = it.sumByDouble { it?.unitqty?:1.0 }.toString()
-            binding.txtTotalAmount.text = decimalPriceFormatter.format(it.sumByDouble { (it?.saleprice?:0.0)  * (it?.unitqty?:1.0)})
+            binding.txtTotalQty.text = it.sumByDouble { it?.unitqty ?: 1.0 }.toString()
+            binding.txtTotalAmount.text = decimalPriceFormatter.format(it.sumByDouble {
+                (it?.saleprice ?: 0.0) * (it?.unitqty ?: 1.0)
+            })
         })
     }
 
@@ -68,22 +81,32 @@ class CheckoutActivity : BaseActivity() {
         onBackPressed()
         return true
     }
+
     override fun onBackPressed() {
-      finish()
+        finish()
     }
 
-    fun setAdapter(){
+    fun setAdapter() {
 
-        checkoutRecyclerAdapter = BaseRecyclerViewAdapter(R.layout.list_item_checkout) { item, view -> bindViewHolder(item, view) }
+        checkoutRecyclerAdapter =
+            BaseRecyclerViewAdapter(R.layout.list_item_checkout) { item, view ->
+                bindViewHolder(
+                    item,
+                    view
+                )
+            }
         checkoutRecyclerView.adapter = checkoutRecyclerAdapter
 
-        val itemTouchHelperCallback : ItemTouchHelper.SimpleCallback =
-                RecyclerItemTouchHelper<ShoppingCartItem>(0,ItemTouchHelper.LEFT) { viewHolder, direction, position ->  onSwiped(viewHolder,direction,position) }
+        val itemTouchHelperCallback: ItemTouchHelper.SimpleCallback =
+            RecyclerItemTouchHelper<ShoppingCartItem>(
+                0,
+                ItemTouchHelper.LEFT
+            ) { viewHolder, direction, position -> onSwiped(viewHolder, direction, position) }
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(checkoutRecyclerView)
 
     }
 
-    fun setData(){
+    fun setData() {
         showProgressBar()
         checkoutViewModel.loadData()?.observe(this, Observer {
             checkoutRecyclerAdapter.setItem(it.toMutableList())
@@ -92,19 +115,18 @@ class CheckoutActivity : BaseActivity() {
 
     }
 
-    fun bindUI(){
+    fun bindUI() {
         currentdocId = MutableLiveData()
         generateddocId = MutableLiveData()
 
         getCurrentDocId()
 
         currentdocId.observe(this, Observer {
-            if(it.count() == 0){
+            if (it.count() == 0) {
                 checkoutViewModel.getDocId("INV-").observe(this, Observer {
                     generateddocId.value = it
                 })
-            }
-            else{
+            } else {
 
                 docId = it[0].voucherno
                 binding.txtVouNo.text = docId
@@ -113,7 +135,7 @@ class CheckoutActivity : BaseActivity() {
 
         generateddocId.observe(this, Observer {
             sqlUtilities.saveDocId(it)
-            docId= it.voucherno
+            docId = it.voucherno
             binding.txtVouNo.text = docId
         })
 
@@ -122,14 +144,14 @@ class CheckoutActivity : BaseActivity() {
         }
     }
 
-    private fun getCurrentDocId(){
+    private fun getCurrentDocId() {
 
         sqlUtilities.getDocId()?.observe(this, Observer {
             currentdocId.value = it
         })
     }
 
-    private fun confirmOrder(){
+    private fun confirmOrder() {
         sqlUtilities.deleteCartItems()
         sqlUtilities.deleteDocId()
         finish()
@@ -141,29 +163,95 @@ class CheckoutActivity : BaseActivity() {
         var txtamount = view.findViewById<TextView>(R.id.txtAmount)
         var txtQty = view.findViewById<TextView>(R.id.txtQty)
         var txtPrice = view.findViewById<TextView>(R.id.txtPrice)
+        var txtRemark = view.findViewById<TextView>(R.id.txtRemark)
 
-        var saleprice : Double? = checkoutItem.saleprice?:0.0
-        var qty : Double? = checkoutItem.unitqty?:1.0
+        var saleprice: Double? = checkoutItem.saleprice ?: 0.0
+        var qty: Double? = checkoutItem.unitqty ?: 1.0
         var amount = saleprice?.times(qty!!)
 
         txtdescription.text = checkoutItem.description
         txtamount.text = decimalPriceFormatter.format(amount)
         txtPrice.text = decimalPriceFormatter.format(saleprice)
-        txtQty.text = qty.toString()+ "  x  "
+        txtQty.text = qty.toString() + "  x  "
+        if (checkoutItem.remark != null && checkoutItem.remark != "")
+            txtRemark.text = checkoutItem.remark
+
+
+        view.setOnClickListener {
+            detailDialog(checkoutItem)
+        }
     }
 
-    private fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int, position: Int){
+    private fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int, position: Int) {
 
         val removeItem = checkoutRecyclerAdapter.getItem(position)
         checkoutRecyclerAdapter.removeItem(position)
         sqlUtilities.deleteCartItem(removeItem)
 
         checkoutViewModel.cardItems.apply {
-             this?.value?.toMutableList()?.forEach{
-                 if(it.sr == removeItem.sr){
-                     this?.value?.toMutableList()?.remove(it)
-                 }
-             }
+            this?.value?.toMutableList()?.forEach {
+                if (it.sr == removeItem.sr) {
+                    this?.value?.toMutableList()?.remove(it)
+                }
+            }
         }
+    }
+
+    //added by ZYP
+    private fun detailDialog(updateItem: ShoppingCartItem) {
+
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(updateItem.description)
+        val detailLayout: View = layoutInflater.inflate(
+            R.layout.dialog_checkout,
+            null
+        )
+        builder.setView(detailLayout)
+
+
+        val txtQty: TextView = detailLayout.findViewById(R.id.dialog_txtQty)
+        txtQty.text = updateItem.unitqty.toString()
+
+        val btnPlus: Button = detailLayout.findViewById(R.id.btn_plus)
+        btnPlus.setOnClickListener {
+            var qty: Double = txtQty.text.toString().toDouble()
+            txtQty.text = (qty + 1).toString()
+        }
+
+        val btnMinus: Button = detailLayout.findViewById(R.id.btn_minus)
+        btnMinus.setOnClickListener {
+            var qty: Double = txtQty.text.toString().toDouble()
+            if (qty > 1.0)
+                txtQty.text = (qty - 1).toString()
+        }
+
+        val txtRemark: TextInputEditText = detailLayout.findViewById(R.id.dialog_txtRemark)
+        if (updateItem.remark != null && updateItem.remark != "")
+            txtRemark.setText(updateItem.remark.toString())
+
+        builder.setPositiveButton("OK") { dialogInterface: DialogInterface, i: Int ->
+            checkoutViewModel.cardItems.apply {
+                this?.value?.toMutableList()?.forEach {
+                    if (it.sr == updateItem.sr) {
+                        it.unitqty = txtQty.text.toString().toDouble()
+                        it.remark = txtRemark.text.toString()
+
+                    }
+                }
+
+                this?.value?.toMutableList().let {
+                    if (it != null) {
+                        checkoutRecyclerAdapter.setItem(it)
+                        binding.txtTotalQty.text = it.sumByDouble { it?.unitqty ?: 1.0 }.toString()
+                        binding.txtTotalAmount.text = decimalPriceFormatter.format(it.sumByDouble {
+                            (it?.saleprice ?: 0.0) * (it?.unitqty ?: 1.0)
+                        })
+                    }
+                }
+            }
+
+        }
+
+        builder.show()
     }
 }

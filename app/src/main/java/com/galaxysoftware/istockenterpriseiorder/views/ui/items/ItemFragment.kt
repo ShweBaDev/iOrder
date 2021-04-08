@@ -2,15 +2,12 @@ package com.galaxysoftware.istockenterpriseiorder.views.ui.items
 
 
 import android.content.Intent
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
+import android.widget.*
 import androidx.appcompat.widget.SearchView
-import android.widget.TextView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -23,6 +20,7 @@ import coil.transform.CircleCropTransformation
 import com.galaxysoftware.istockenterpriseiorder.R
 import com.galaxysoftware.istockenterpriseiorder.dao.SqlUtilities
 import com.galaxysoftware.istockenterpriseiorder.databinding.FragmentItemsBinding
+import com.galaxysoftware.istockenterpriseiorder.models.Category
 import com.galaxysoftware.istockenterpriseiorder.models.ShoppingCartItem
 import com.galaxysoftware.istockenterpriseiorder.models.UsrCode
 import com.galaxysoftware.istockenterpriseiorder.utils.Utility.hideProgressBar
@@ -33,7 +31,9 @@ import com.galaxysoftware.istockenterpriseiorder.views.ui.itemdetail.ItemDetailA
 
 class ItemFragment : Fragment() {
 
-    lateinit  var orgCodeList:MutableList<UsrCode>
+    lateinit var orgCodeList: MutableList<UsrCode>
+    lateinit var orgCategoryList: MutableList<Category>
+
     lateinit  var filteredCodeList:MutableList<UsrCode>
 
     lateinit var cartItemList :MutableList<ShoppingCartItem>
@@ -54,6 +54,8 @@ class ItemFragment : Fragment() {
 
     private  var selectedItemIndex : Int = -9
 
+    private lateinit var categorySpinner: Spinner
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -70,9 +72,11 @@ class ItemFragment : Fragment() {
         val view = binding.root
 
 
+        categorySpinner = binding.spnCategory
         itemRecyclerView = binding.itemsRecyclerView
         itemRecyclerView.layoutManager = LinearLayoutManager(container?.context!!)
 
+        orgCategoryList = mutableListOf<Category>()
         orgCodeList = mutableListOf<UsrCode>()
         filteredCodeList = mutableListOf()
         cartItemList = mutableListOf()
@@ -104,11 +108,14 @@ class ItemFragment : Fragment() {
             }
         })
 
+
         getCartItems()
         setAdapter()
         setData()
+        //getCategory()
         return view
     }
+
 
 
     fun setFunction(callback: () -> Unit) {
@@ -128,6 +135,11 @@ class ItemFragment : Fragment() {
 
             orgCodeList.addAll(usrCodeList)
             itemRecyclerAdapter.setItem(usrCodeList.toMutableList())
+
+        })
+        itemViewModel.loadCategory().observe(this, Observer<List<Category>>{
+            orgCategoryList.addAll(it)
+            getCategory()
             hideProgressBar()
         })
     }
@@ -199,4 +211,43 @@ class ItemFragment : Fragment() {
             }
         })
     }
+
+    //Added by ZYP
+    private fun getCategory(){
+
+        val itemList:MutableList<String> = ArrayList()
+        itemList.add("All Items")
+        orgCategoryList.forEach {
+           itemList.add(it.name)
+        }
+        var arrayAdapter = ArrayAdapter<String>(requireContext(),android.R.layout.simple_spinner_item, itemList)
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        categorySpinner.setAdapter(arrayAdapter)
+        categorySpinner.setSelection(0)
+        categorySpinner.onItemSelectedListener = object :
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>,
+                                        view: View, position: Int, id: Long) {
+
+                if(position == 0){
+                    itemRecyclerAdapter.setItem(orgCodeList)
+                }
+                else{
+                    filteredCodeList.clear()
+                    orgCodeList.forEach {
+                        if(it.categoryid == orgCategoryList.get(position - 1).categoryid)
+                            filteredCodeList.add(it)
+                    }
+                    itemRecyclerAdapter.setItem(filteredCodeList)
+                }
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // write code to perform some action
+            }
+        }
+
+    }
+
 }
