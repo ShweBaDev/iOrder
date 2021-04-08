@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.galaxysoftware.istockenterpriseiorder.R
+import com.galaxysoftware.istockenterpriseiorder.models.ShoppingCartItem
 
 public class BaseRecyclerViewAdapter<T>(@LayoutRes val layoutId: Int,private val bindViewHolder : (T, View) -> Unit) :
         RecyclerView.Adapter<BaseRecyclerViewAdapter.BaseViewHolder<T>>() {
@@ -94,5 +96,6 @@ class RecyclerItemTouchHelper<T>(dragDirs: Int, swipeDirs: Int, private val list
     override fun convertToAbsoluteDirection(flags: Int, layoutDirection: Int): Int {
         return super.convertToAbsoluteDirection(flags, layoutDirection)
     }
+
 
 }

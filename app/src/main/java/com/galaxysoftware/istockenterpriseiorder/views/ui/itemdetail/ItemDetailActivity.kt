@@ -1,20 +1,14 @@
 package com.galaxysoftware.istockenterpriseiorder.views.ui.itemdetail
 
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
-import android.provider.CalendarContract
 import android.view.View
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
 import coil.api.load
-import coil.transform.CircleCropTransformation
 import com.galaxysoftware.istockenterpriseiorder.BaseActivity
 import com.galaxysoftware.istockenterpriseiorder.R
 import com.galaxysoftware.istockenterpriseiorder.dao.SqlUtilities

@@ -23,5 +23,9 @@ data class UsrCode (
     val imageurl : String?,
 
     @ColumnInfo(name="units")
-    val units : List<UnitCode>
+    val units : List<UnitCode>,
+
+    @ColumnInfo(name="categoryid")
+    val categoryid : Int?
+
 )
