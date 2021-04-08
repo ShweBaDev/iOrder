@@ -37,4 +37,9 @@
         <item name="itemTextAppearance">?attr/textAppearanceBody2</item>
     </style>
 
+    <style name="mySpinnerStyle" parent="@style/Widget.AppCompat.ListView.DropDown">
+        <item name="android:divider">#E5E5E5</item>
+        <item name="android:dividerHeight">0.5dp</item>
+    </style>
+
 </resources>

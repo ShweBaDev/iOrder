@@ -77,6 +77,9 @@
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.MyTheme.BottomSheetDialog</item>
         <item name="navigationViewStyle">@style/Widget.MyTheme.NavigationView</item>
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.PrimarySurface</item>
+
+        <item name="android:dropDownListViewStyle">@style/mySpinnerStyle</item>
+
     </style>
     <style name="Base.Theme.MaterialThemeBuilder" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
        <!-- <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorSurface</item>-->

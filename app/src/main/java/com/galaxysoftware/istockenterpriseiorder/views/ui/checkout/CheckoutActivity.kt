@@ -207,7 +207,7 @@ class CheckoutActivity : BaseActivity() {
             null
         )
         builder.setView(detailLayout)
-
+        val dialog: AlertDialog = builder.create()
 
         val txtQty: TextView = detailLayout.findViewById(R.id.dialog_txtQty)
         txtQty.text = updateItem.unitqty.toString()
@@ -229,7 +229,8 @@ class CheckoutActivity : BaseActivity() {
         if (updateItem.remark != null && updateItem.remark != "")
             txtRemark.setText(updateItem.remark.toString())
 
-        builder.setPositiveButton("OK") { dialogInterface: DialogInterface, i: Int ->
+        val btnOk: Button = detailLayout.findViewById(R.id.btn_ok)
+        btnOk.setOnClickListener {
             checkoutViewModel.cardItems.apply {
                 this?.value?.toMutableList()?.forEach {
                     if (it.sr == updateItem.sr) {
@@ -250,8 +251,15 @@ class CheckoutActivity : BaseActivity() {
                 }
             }
 
+            dialog.dismiss()
+
         }
 
-        builder.show()
+        val btnCancel: Button = detailLayout.findViewById(R.id.btn_cancel)
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 }

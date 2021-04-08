@@ -74,7 +74,7 @@ class ItemFragment : Fragment() {
 
         categorySpinner = binding.spnCategory
         itemRecyclerView = binding.itemsRecyclerView
-        itemRecyclerView.layoutManager = LinearLayoutManager(container?.context!!)
+        itemRecyclerView.layoutManager = LinearLayoutManager(container.context!!)
 
         orgCategoryList = mutableListOf<Category>()
         orgCodeList = mutableListOf<UsrCode>()
@@ -220,10 +220,11 @@ class ItemFragment : Fragment() {
         orgCategoryList.forEach {
            itemList.add(it.name)
         }
-        var arrayAdapter = ArrayAdapter<String>(requireContext(),android.R.layout.simple_spinner_item, itemList)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        categorySpinner.setAdapter(arrayAdapter)
+        var arrayAdapter = ArrayAdapter<String>(requireContext(),android.R.layout.simple_list_item_1, itemList)
+        //arrayAdapter.setDropDownViewResource(android.R.layout.simple_list_item_1)
+        categorySpinner.adapter = arrayAdapter
         categorySpinner.setSelection(0)
+        categorySpinner.dropDownWidth = categorySpinner.width
         categorySpinner.onItemSelectedListener = object :
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
